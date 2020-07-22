@@ -8,6 +8,8 @@ namespace preference.Models
         public ObjectId InternalId { get; set; }
         public long Id { get; set; }
         public string Title { get; set; }
-        public string Content { get; set; }
+        public string Description { get; set; }
+        public string Severity { get; set; }
+        public string Status { get; set; }
     }
 }

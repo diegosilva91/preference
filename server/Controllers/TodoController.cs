@@ -4,22 +4,30 @@ namespace preference.Controllers
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Microsoft.AspNetCore.SignalR;
     using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Mvc;    
+    using Microsoft.AspNetCore.Mvc;
+    using server.Hubs;    
+    
     [Produces("application/json")]
     [Route("api/[Controller]")]
     public class TodosController: Controller
     {
+        private readonly IHubContext<IssueHub> hubContext;
         private readonly ITodoRepository _repo;        
-        public TodosController(ITodoRepository repo)
+        public TodosController(ITodoRepository repo,IHubContext<IssueHub> hubContext)
         {
             _repo = repo;
-        }        // GET api/todos
+            this.hubContext = hubContext;
+        }        
+        // GET api/todos
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Todo>>> Get()
         {
+            await this.hubContext.Clients.All.SendAsync("IssuesChanges",await _repo.GetAllTodos());
             return new ObjectResult(await _repo.GetAllTodos());
-        }        // GET api/todos/1
+        }        
+        // GET api/todos/1
         [HttpGet("{id}")]
         public async Task<ActionResult<Todo>> Get(long id)
         {
@@ -56,5 +64,9 @@ namespace preference.Controllers
             await _repo.Delete(id);            
             return new OkResult();
         }
+        /*[HttpPatch("{id}/upvote")]
+        public async Task<ActionResult> UpvoteQuestionAsync(Guid id){
+
+        }*/
     }
 }
